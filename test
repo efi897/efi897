@@ -1,0 +1,94 @@
+import React, { useEffect } from 'react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+import markerIcon from './pin.png';
+
+let mapInstance; // Global variable to hold the map instance
+
+function MyMap() {
+  useEffect(() => {
+    // Check if the map instance exists
+    if (!mapInstance) {
+      // Create the map container element
+      const mapContainer = L.DomUtil.get('map');
+
+      // Check if the map container exists
+      if (mapContainer) {
+        // Initialize the map
+        mapInstance = L.map(mapContainer).setView([8.763999146545743, 38.98341412184996], 11);
+
+        // Add the tile layer
+        L.tileLayer.wms('http://localhost:8082/geoserver/Bishoftu_Das/wms', {
+            layers: 'Bishoftu_Das:Bishoftu_Das',
+            format: 'image/png',
+            transparent: true,
+            attribution: 'Your attribution here',
+        }).addTo(mapInstance);
+
+        // Create an object to hold your base layers
+        const baseLayers = {
+          'Geoserver Layer': L.tileLayer.wms('http://localhost:8082/geoserver/Bishoftu_Das/wms', {
+            layers: 'Bishoftu_Das:Bishoftu_Das',
+            format: 'image/png',
+            transparent: true,
+            attribution: 'Your attribution here',
+        }),
+        };
+
+        // Create an object to hold your overlay layers
+        const overlayLayers = {
+            'OSM': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'),
+            'Google Maps': L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'),
+            // Add more base layers as needed,
+        
+          // Add more overlay layers as needed
+        };
+
+        // Add the layer control to the map
+        L.control.layers(baseLayers, overlayLayers).addTo(mapInstance);
+ // Create a custom marker icon
+ const customIcon = L.icon({
+    iconUrl: markerIcon,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41],
+  });
+//   mapInstance.locate({setView: true, maxZoom: 16});
+//   function onLocationFound(e) {
+
+//     var radius = e.accuracy;
+
+//     L.marker(e.latlng).addTo(mapInstance)
+//         .bindPopup("You are within " + radius + " meters from this point").openPopup();
+//         L.marker([8.763999146545743, 38.98341412184996], { icon: customIcon }).addTo(mapInstance)
+
+//     L.circle(e.latlng, radius).addTo(mapInstance);
+// }
+// mapInstance.on('locationfound', onLocationFound);
+
+var c = new L.Control.Coordinates(); 
+c.addTo(mapInstance);
+
+mapInstance.on('click', function(e) {
+	c.setCoordinates(e);
+});
+//Scale
+L.control.scale().addTo(mapInstance);
+
+
+  // Add the marker with the custom icon
+  L.marker([8.763999146545743, 38.98341412184996], { icon: customIcon }).addTo(mapInstance)
+    .bindPopup('Ethiopia<br> Bishofru<br>Das project')
+    .openPopup();
+      }
+    }
+  }, []);
+
+  return (
+    <div id='map' style={{ height: '750px' }}></div>
+  );
+}
+
+export default MyMap;
